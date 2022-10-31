@@ -27,13 +27,13 @@ export const Modal = ({ children,closeModal }:ModalProps) => {
 
   return ReactDOM.createPortal(
     <div className='modal flex justify-center fixed inset-0 bg-black/50 z-50'>
-      <div className='relative bg-white p-6 w-[min(90%,1000px)] self-start mt-5 rounded-lg'>
+      <div className='relative bg-white p-6 w-[min(90%,1000px)] self-start mt-5 rounded-lg h-[90vh] overflow-y-auto'>
         {
         <button
           className='absolute top-0 right-0 p-1 text-black'
           onClick={closeModal}
         >
-          <CrossIcon className='w-6' />
+          <CrossIcon className='w-8' />
         </button> 
         }
         

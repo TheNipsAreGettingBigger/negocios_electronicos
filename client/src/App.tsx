@@ -4,6 +4,7 @@ import { Modal,InvoiceTable } from "./components";
 function App() {
 
   const [xml, setXML] = useState<Document>()
+  const [xmlString,setXmlString] = useState<string>("")
   const divDropContainer = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
     divDropContainer.current?.addEventListener('dragover', (e) => {
@@ -36,6 +37,7 @@ function App() {
         let parser = new DOMParser();
         let xmlDOM = parser.parseFromString(XMLData, 'application/xml');
         setXML(xmlDOM);
+        setXmlString(XMLData)
       }
     })
   }, [])
@@ -54,7 +56,7 @@ function App() {
       </div>
       {
         xml && <Modal closeModal={() => setXML(undefined)  }>
-          <InvoiceTable xml={xml} />
+          <InvoiceTable xml={xml} XMLData={xmlString} />
         </Modal>
       }
     </>
