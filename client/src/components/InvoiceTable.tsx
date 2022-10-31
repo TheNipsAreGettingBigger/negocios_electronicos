@@ -18,6 +18,7 @@ export const InvoiceTable = ({ xml, XMLData }: TablaFacturaProps) => {
   const [adquirenteInformation, setAdquirenteInformation] = useState<any>()
   const [factura, setFactura] = useState<any>({})
   const [loading, setLoading] = useState(true)
+  const [msg,setMsg] = useState("")
 
   useEffect(() => {
     const ruc = xml.getElementsByTagName('cac:PartyIdentification')[0].getElementsByTagName('cbc:ID')[0].childNodes[0].nodeValue
@@ -80,7 +81,10 @@ export const InvoiceTable = ({ xml, XMLData }: TablaFacturaProps) => {
       })
     })
     // ni retencion ni detraccion
-    if (_igv == 0) return
+    if (_igv == 0) {
+      setMsg("SIN IGV")
+      return
+    }
 
     // verificar si el importe es mayor a 700
     if (importe < 700) return
@@ -88,11 +92,11 @@ export const InvoiceTable = ({ xml, XMLData }: TablaFacturaProps) => {
     // PRIORIDAD DETRACCION EN EL CASO QUE LOS DOS EXISTAN
     exoneracionRetension(ruc as string)
       .then(data => {
-        console.log("🚀 ~ file: InvoiceTable.tsx ~ line 90 ~ useEffect ~ data", data)
         const esExonerado = data.responde
         if (esExonerado) {
           existeRetension = false
-          setFactura((fc:any)=>({...fc,pagar: total,existeRetension, msgRetraccion: "Designado AGENTE DE RETENCION, no sujeto a retención del 3% del IGV"}))
+          setFactura((fc:any)=>({...fc,pagar: total,existeRetension}))
+          setMsg( "Designado AGENTE DE RETENCION, no sujeto a retención del 3% del IGV")
         } else {
           if(json.Invoice.AllowanceCharge?.MultiplierFactorNumeric){
             console.log('si se aplica')
@@ -106,21 +110,23 @@ export const InvoiceTable = ({ xml, XMLData }: TablaFacturaProps) => {
         existeDetraccion = false
         const supuestoTotal = json.Invoice.LegalMonetaryTotal.PayableAmount
         
-        if(!Array.isArray(json.Invoice.PaymentTerms)){
-          if(json.Invoice.PaymentTerms.Amount != supuestoTotal){
-            existeDetraccion = true
-            let detraccion = parseFloat(`${total * 0.12}`).toFixed(2)
-            total = total - parseFloat(detraccion)
-            setFactura((fc:any)=>({...fc,pagar: total,existeDetraccion,detraccion}))
-          }
-        }else{
-          for (const item of json.Invoice.PaymentTerms) {
-            if(item.Amount != supuestoTotal){
+        if(!existeRetension && !esExonerado){
+          if(!Array.isArray(json.Invoice.PaymentTerms)){
+            if(json.Invoice.PaymentTerms.Amount != supuestoTotal){
               existeDetraccion = true
               let detraccion = parseFloat(`${total * 0.12}`).toFixed(2)
               total = total - parseFloat(detraccion)
               setFactura((fc:any)=>({...fc,pagar: total,existeDetraccion,detraccion}))
-              break
+            }
+          }else{
+            for (const item of json.Invoice.PaymentTerms) {
+              if(item.Amount != supuestoTotal){
+                existeDetraccion = true
+                let detraccion = parseFloat(`${total * 0.12}`).toFixed(2)
+                total = total - parseFloat(detraccion)
+                setFactura((fc:any)=>({...fc,pagar: total,existeDetraccion,detraccion}))
+                break
+              }
             }
           }
         }
@@ -276,7 +282,7 @@ export const InvoiceTable = ({ xml, XMLData }: TablaFacturaProps) => {
                 </tbody>
               </table>
               {
-                factura.msgRetraccion && <p className="text-[#198754] font-bold text-xs">{factura.msgRetraccion}</p>
+                msg.length ? <p className="text-[#198754] font-bold text-xs">STATUS : {msg}</p> : null
               }
               <hr />
             </div>
