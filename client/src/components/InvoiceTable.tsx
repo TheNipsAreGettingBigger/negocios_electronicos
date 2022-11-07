@@ -121,6 +121,7 @@ export const InvoiceTable = ({ xml, XMLData }: TablaFacturaProps) => {
           }else{
             for (const item of json.Invoice.PaymentTerms) {
               if(item.Amount != supuestoTotal){
+                console.log('entre aqui',item.Amount,supuestoTotal)
                 existeDetraccion = true
                 let detraccion = parseFloat(`${total * 0.12}`).toFixed(2)
                 total = total - parseFloat(detraccion)
