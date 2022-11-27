@@ -6,8 +6,14 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #ECF2F7;
+  /* background-color: #ECF2F7; */
+  /* background-color: #CED8EB; */
+  background-color: #EFF2FC;
   padding: 1em;
+}
+
+body{
+  font-family: 'Roboto Condensed', sans-serif;
 }
 
 .dd-select {
@@ -72,4 +78,15 @@
 .panels__item.active {
   position: relative;
   left: 0;
+}
+
+.select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url(assets/download.svg);
+  background-position: right .5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
 }
