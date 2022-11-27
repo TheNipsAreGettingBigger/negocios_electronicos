@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "upload-agente" : "node ./src/routes/upload_agente_retencion.router.js"
+    "init" : "node ./src/routes/init.js"
   },
   "keywords": [],
   "author": "",
