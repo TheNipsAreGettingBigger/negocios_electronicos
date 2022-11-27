@@ -40,16 +40,16 @@ export const Analizyer = () => {
       e.preventDefault()
       divDropContainer.current?.classList.remove('drop');
       const fileXML = e.dataTransfer.files[0]
-      console.log(documentType)
-      if(documentType == -1) return
+      if(documentType == -1) {
+        setXML(undefined)
+        return
+      }
       let reader = new FileReader();
       reader.readAsText(fileXML);
       reader.onloadend = function () {
           let XMLData = reader.result as string;
           let parser = new DOMParser();
           let xmlDOM = parser.parseFromString(XMLData, 'application/xml');
-          console.log({XMLData });
-          console.log({xmlDOM });
           setXML(xmlDOM);
           setXmlString(XMLData)
         }
@@ -94,11 +94,14 @@ export const Analizyer = () => {
         </div>
       </div>
       {
-        xml && <Modal closeModal={() => setXML(undefined)  }>
+        (!!xml && documentType !== -1) && <Modal closeModal={() => {
+            setXML(undefined)
+            // setDocumentType(-1)
+          }  }>
           {
-            documentType === 'FC' ? <InvoiceTable XMLData={xmlString} xml={xml} /> : <ReceiptTable /> 
+            documentType === 'FC' ? <InvoiceTable XMLData={xmlString} xml={xml} /> : <ReceiptTable xml={xmlString} /> 
           }
-          
+
         </Modal>
       }
     </>

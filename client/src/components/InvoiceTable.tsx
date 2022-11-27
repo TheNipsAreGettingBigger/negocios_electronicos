@@ -300,7 +300,7 @@ export const InvoiceTable = ({ xml, XMLData }: TablaFacturaProps) => {
           description: JSON.stringify(adquirenteInformation, null, 2)
         }
       ]} />
-      <Export factura={[{
+      {/* <Export factura={[{
         FechaDocumento: factura.fechaFacturacion,
         num_factura: factura.referencia,
         venta: factura.totalVenta,
@@ -308,7 +308,7 @@ export const InvoiceTable = ({ xml, XMLData }: TablaFacturaProps) => {
         total: parseFloat(factura.totalVenta) + parseFloat(factura.IGV),
         a_pagar: factura.pagar,
         detraccion: factura.existeDetraccion ? factura.detraccion : 0,
-      }]} />
+      }]} /> */}
     </>
   )
 }
