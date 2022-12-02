@@ -90,7 +90,7 @@ export const Analizyer = () => {
               <span>Asegurate que el archivo que arrastres sea un archivo con extension <strong>.xml</strong></span>
             </p>
           </div>
-          <div className="relative flex-1">
+          <div className="relative flex-1 mt-2">
             <div className='w-full h-full flex flex-col items-center justify-center gap-3'>
               <img src={XMLICON} alt="" className='w-40 h-40' />
               <h1 className='text-xl sm:text-4xl text-center'>Arrastra aqui el archivo <strong>XML</strong></h1>
