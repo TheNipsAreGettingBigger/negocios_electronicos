@@ -3,23 +3,24 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import XMLICON from './assets/xml-icon.png';
 import { InvoiceTable, Modal } from './components';
 import { ReceiptTable } from './components/ReceiptTable';
-
-const options = [
-  {
-    value : 'RH',
-    message : 'Recibo por Honorarios'
-  },
-  {
-    value : 'FC',
-    message : 'Factura'
-  }
-]
+import X2JS from "x2js"
+// const options = [
+//   {
+//     value : 'RH',
+//     message : 'Recibo por Honorarios'
+//   },
+//   {
+//     value : 'FC',
+//     message : 'Factura'
+//   }
+// ]
 
 export const Analizyer = () => {
   const divDropContainer = useRef<HTMLDivElement>(null)
   const [xml, setXML] = useState<Document>()
-  const [documentType,setDocumentType] = useState<any>(-1)
+  // const [documentType,setDocumentType] = useState<any>(-1)
   const [xmlString,setXmlString] = useState<string>("")
+  const [esRecibo,setEsRecibo] = useState(true)
   useLayoutEffect(() => {
     divDropContainer.current?.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -40,10 +41,10 @@ export const Analizyer = () => {
       e.preventDefault()
       divDropContainer.current?.classList.remove('drop');
       const fileXML = e.dataTransfer.files[0]
-      if(documentType == -1) {
-        setXML(undefined)
-        return
-      }
+      // if(documentType == -1) {
+      //   setXML(undefined)
+      //   return
+      // }
       let reader = new FileReader();
       reader.readAsText(fileXML);
       reader.onloadend = function () {
@@ -52,10 +53,15 @@ export const Analizyer = () => {
           let xmlDOM = parser.parseFromString(XMLData, 'application/xml');
           setXML(xmlDOM);
           setXmlString(XMLData)
+          var x2js = new X2JS();
+          var json = x2js.xml2js(XMLData) as any
+          console.log(Object.hasOwn(json.Invoice,'DueDate'))
+          setEsRecibo(!Object.hasOwn(json.Invoice,'DueDate'))
         }
       
     })
-  }, [documentType])
+  // }, [documentType])
+  }, [])
 
   return (
     <>
@@ -63,7 +69,7 @@ export const Analizyer = () => {
         <div className="w-full h-full border rounded-xl p-3 flex flex-col">
           <h1 className="text-[#697388] font-semibold">Analizador de XML</h1>
           <div className="grid gap-2 p-2">
-            <h1 className="text-center text-[#929AAB] text-lg font-semibold">Selecciona el tipo de documento</h1>
+            {/* <h1 className="text-center text-[#929AAB] text-lg font-semibold">Selecciona el tipo de documento</h1>
             <div className="w-full m-auto sm:w-2/3">
               <select id="large" className="block w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus-visible:ring-blue-500 focus-visible:border-blue-500 focus:ring-blue-500 focus:border-blue-500 select"
                 value={documentType}
@@ -74,7 +80,7 @@ export const Analizyer = () => {
                   options.map(item=><option value={item.value} key={item.value}>{ item.message }</option>)
                 }
               </select>
-            </div>
+            </div> */}
             <p className="flex text-[#727374]">
               <span>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" color="#48BBD9" className="w-6 h-6">
@@ -94,12 +100,12 @@ export const Analizyer = () => {
         </div>
       </div>
       {
-        (!!xml && documentType !== -1) && <Modal closeModal={() => {
+        (!!xml) && <Modal closeModal={() => {
             setXML(undefined)
             // setDocumentType(-1)
           }  }>
           {
-            documentType === 'FC' ? <InvoiceTable XMLData={xmlString} xml={xml} /> : <ReceiptTable xml={xmlString} /> 
+            esRecibo ?  <ReceiptTable xml={xmlString} /> : <InvoiceTable XMLData={xmlString} xml={xml} />
           }
 
         </Modal>
