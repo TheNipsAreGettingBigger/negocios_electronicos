@@ -3,6 +3,7 @@ import X2JS from "x2js"
 import { Result } from "../interfaces"
 import { rucService } from "../services"
 import { exoneracionRetension } from "../services/exoneracionRetencionService"
+import { DetraccionPorcentaje } from "./DetraccionPorcentaje"
 import { Export } from "./Export"
 import { Spinner } from "./Spinner"
 import { Tabs } from "./Tabs"
@@ -111,24 +112,46 @@ export const InvoiceTable = ({ xml, XMLData }: TablaFacturaProps) => {
         const supuestoTotal = json.Invoice.LegalMonetaryTotal.PayableAmount
         
         if(!existeRetension && !esExonerado){
+          // LineExtensionAmount pagar
+          // PayableAmount total
+          let pJ = 0
+          let tJ = 0
+          let porcentajeDetracion = 0
+          // let pJ = parseFloat(json.Invoice.PaymentTerms.filter((payment:any)=>Object.hasOwn(payment,'PaymentDueDate'))[0].Amount.toString())
+          // let pJ = parseFloat(json.Invoice.LegalMonetaryTotal.LineExtensionAmount.toString())
+          // console.log({pJ},'a')
+          // let tJ = parseFloat(json.Invoice.LegalMonetaryTotal.PayableAmount.toString())
+          // console.log({tJ})
+          // let porcentajeDetraccion = Math.round((tJ - pJ)*(100/tJ))
+          // console.log(porcentajeDetraccion);
           if(!Array.isArray(json.Invoice.PaymentTerms)){
             if(json.Invoice.PaymentTerms.Amount != supuestoTotal){
+              pJ = parseFloat(json.Invoice.PaymentTerms.Amount.toString())
+              tJ = parseFloat(json.Invoice.LegalMonetaryTotal.PayableAmount.toString())
+              porcentajeDetracion = Math.round((tJ - pJ)*(100/tJ))
               existeDetraccion = true
-              let detraccion = parseFloat(`${total * 0.12}`).toFixed(2)
-              total = total - parseFloat(detraccion)
-              setFactura((fc:any)=>({...fc,pagar: total,existeDetraccion,detraccion}))
+              let detraccion = parseFloat(`${tJ * porcentajeDetracion/100}`).toFixed(2)
+              total = tJ - parseFloat(detraccion)
+              setFactura((fc:any)=>({...fc,pagar: pJ,existeDetraccion,detraccion,totalVenta:tJ,porcentajeDetracion}))
             }
           }else{
-            for (const item of json.Invoice.PaymentTerms) {
-              if(item.Amount != supuestoTotal){
-                console.log('entre aqui',item.Amount,supuestoTotal)
-                existeDetraccion = true
-                let detraccion = parseFloat(`${total * 0.12}`).toFixed(2)
-                total = total - parseFloat(detraccion)
-                setFactura((fc:any)=>({...fc,pagar: total,existeDetraccion,detraccion}))
-                break
-              }
-            }
+            pJ = parseFloat(json.Invoice.PaymentTerms.filter((payment:any)=>Object.hasOwn(payment,'PaymentDueDate'))[0].Amount.toString())
+            tJ = parseFloat(json.Invoice.LegalMonetaryTotal.PayableAmount.toString())
+            porcentajeDetracion = Math.round((tJ - pJ)*(100/tJ))
+            existeDetraccion = true
+            let detraccion = parseFloat(`${tJ * porcentajeDetracion/100}`).toFixed(2)
+            total = tJ - parseFloat(detraccion)
+            setFactura((fc:any)=>({...fc,pagar: pJ,existeDetraccion,detraccion,totalVenta:tJ,porcentajeDetracion}))
+            // for (const item of json.Invoice.PaymentTerms) {
+            //   if(item.Amount != supuestoTotal){
+            //     console.log('entre aqui',item.Amount,supuestoTotal)
+            //     existeDetraccion = true
+            //     let detraccion = parseFloat(`${total * 0.12}`).toFixed(2)
+            //     total = total - parseFloat(detraccion)
+            //     setFactura((fc:any)=>({...fc,pagar: total,existeDetraccion,detraccion}))
+            //     break
+            //   }
+            // }
           }
         }
       })
@@ -213,18 +236,21 @@ export const InvoiceTable = ({ xml, XMLData }: TablaFacturaProps) => {
         <div className="overflow-x-auto ">
           <div className="py-4 inline-block min-w-full">
             <div className="">
+              {
+                factura.existeDetraccion && <DetraccionPorcentaje porcentaje={factura.porcentajeDetracion} />
+              }
               <table className="min-w-full text-center">
                 <thead className="border-b bg-gray-800">
                   <tr>
                     <th scope="col" className="text-sm  text-white px-6 py-4">
-                      Sub Total venta
+                      Importe total
                     </th>
                     <th scope="col" className="text-sm  text-white px-6 py-4">
                       IGV 18%
                     </th>
                     {
                       factura.existeDetraccion && <th scope="col" className="text-sm  text-white px-6 py-4">
-                        Detraccion
+                        Detraccion { factura.porcentajeDetracion+"%" }
                       </th>
                     }
                     {
@@ -243,7 +269,7 @@ export const InvoiceTable = ({ xml, XMLData }: TablaFacturaProps) => {
                       </th>
                     }
                     <th scope="col" className="text-sm  text-white px-6 py-4">
-                      A pagar
+                      A pagar {'=>'} Monto
                     </th>
                   </tr>
                 </thead>
