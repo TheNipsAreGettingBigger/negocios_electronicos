@@ -53,10 +53,11 @@ export const Analizyer = () => {
           let xmlDOM = parser.parseFromString(XMLData, 'application/xml');
           setXML(xmlDOM);
           setXmlString(XMLData)
+          
           var x2js = new X2JS();
           var json = x2js.xml2js(XMLData) as any
           console.log(Object.hasOwn(json.Invoice,'DueDate'))
-          setEsRecibo(!Object.hasOwn(json.Invoice,'DueDate'))
+          setEsRecibo(!Object.hasOwn(json.Invoice,'DueDate') && Object.hasOwn(json.Invoice,'ExpiryDate'))
         }
       
     })
